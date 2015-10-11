@@ -1,0 +1,112 @@
+<head>
+  <title>FreeCodeCamp Twitch Status </title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+  <link href='https://fonts.googleapis.com/css?family=Lobster|PT+Sans' rel='stylesheet' type='text/css'>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-MfvZlkHCEqatNoGiOXveE8FIwMzZg4W85qfrfIFBfYc= sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ=="
+  crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha256-Sk3nkD6mLTMOF0EOpNtsIry+s1CsaqQC1rVLTAy+0yc= sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+</head>
+
+<body ng-app="twitchChannel">
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-4 col-xs-offset-4 text-left">
+        <div id="wrapper" ng-controller="ChannelController">
+          <div class="heading text-center" id="navMenu">
+            <div class="col-xs-4"  id="all"><span>All</span></div>
+            <div class="col-xs-4" id="online"><span>Online</span></div>
+            <div class="col-xs-4" id="offline"><span>Offline</span></div>
+          </div>
+          <div class="search">
+            <label for="searchId" class="glyphicon glyphicon-search" aria-hidden="true"></label>
+            <input type="text" id="searchId" ng-model="searchKeyword"/>
+          </div>
+          <hr>
+          <div class="details" ng-repeat="channel in channels | filter: searchKeyword">
+            <a href="{{channel.link}}" target="_blank">
+            <div id="{{channel.x}}" class="row liveshow">
+              <div class="col-xs-3"><span><img ng-src="{{channel.logo  || 'http://placehold.it/50x50'}}" /></span></div>
+              <div class="col-xs-6 vcenter"><span>{{channel.name}}</span><p style="font-size:12px">{{channel.stream.channel.status | limitTo:25}}</p></div>
+              <div class="col-xs-3 vcenter" ng-show={{channel.status}}><span class="fa fa-check"></span></div>
+              <div class="col-xs-3 vcenter" ng-show={{!channel.status}}><span class="fa fa-exclamation"></span></div>
+            </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+<script type="text/javascript">
+
+// Code goes here
+var app = angular.module('twitchChannel', []);
+
+app.controller('ChannelController', function($scope, $http) {
+    var users = ["freecodecamp", "storbeck", "terakilobyte", "habathcx",
+        "RobotCaleb", "thomasballinger", "noobs2ninjas", "beohoff", "medrybw"
+    ];
+    
+    $scope.all = []; 
+    $scope.online = []; 
+    $scope.offline = [];
+    
+    users.forEach(function(x) {
+        var logo = "",
+            stream = "",
+            status = false;
+        var link = "http://twitch.tv/" + x;
+        
+        $.getJSON("https://api.twitch.tv/kraken/users/" + x, function(data) {
+            logo = data.logo;
+
+            $.getJSON("https://api.twitch.tv/kraken/streams/" + x + "?limit=500&callback=?", function(data) {
+                //console.log(x, data);
+                stream = data.stream;
+                //console.log(logo + stream);
+                y = {
+                    name: x,
+                    logo: logo,
+                    link: link,
+                    stream: stream,
+                    status: status
+                };
+                
+                if (stream !== null) {
+                    y.status = true;
+                    $scope.online.push(y);
+                } else {
+                    y.status = false;
+                    $scope.offline.push(y);
+                }
+                //console.log(y);
+                $scope.all.push(y);
+
+                $scope.channels = $scope.all;
+                $scope.$apply();
+             });
+        });
+
+    });
+    
+    $(document).ready(function() {
+        $("#navMenu div").click(function() {
+            var id = $(this).attr("id");
+            console.log(id);
+            if (id === "all") {
+                $scope.channels = $scope.all;
+            } else if (id === "online") {
+                $scope.channels = $scope.online;
+            } else if (id === "offline") {
+                $scope.channels = $scope.offline;
+            }
+            $scope.$apply();
+        });
+    });
+});
+
+
+</script>
+</html>

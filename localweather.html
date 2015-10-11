@@ -1,0 +1,78 @@
+<head>
+    <title>Local Weather App </title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Lobster|PT+Sans' rel='stylesheet' type='text/css'>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-MfvZlkHCEqatNoGiOXveE8FIwMzZg4W85qfrfIFBfYc= sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ=="
+    crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha256-Sk3nkD6mLTMOF0EOpNtsIry+s1CsaqQC1rVLTAy+0yc= sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="wrapper">
+        <div class="header row text-center text-primary">
+            <h1>Free Code Camp Zipline</h1>
+            <h2>Local Weather App</h2>
+        </div>
+        <div class="container">
+            <div class="row" id="tempdiv" style="padding-left: 150px">
+                <img id="img_icon" />
+                <span id="temp"></span>
+                <button id="toggle" class="btn btn-primary"></button>
+            </div>
+            <div class="detail">
+                </em><span id="city"></span>
+                <span id="desc"></span>
+                <span id="wind"></span> 
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    var api_url = "http://api.openweathermap.org/data/2.5/weather?APPID=810927416455b217ead274b2056ff2cd&q=";
+    var country_code = "";
+    var city = "";
+    $(document).ready(function() {
+        jQuery.ajax({
+            url: '//freegeoip.net/json/',
+            type: 'POST',
+            dataType: 'jsonp',
+            success: function(location) {
+                // example where I update content on the page.
+                jQuery('#city').html(location.city + ', ' + location.region_name);
+                country_code = location.country_code;
+                city = location.city;
+                api_url = api_url + city + ',' + country_code;
+                console.log(api_url);
+                $.getJSON(api_url, function(data) {
+                    var temp = (data.main.temp - 273.15).toFixed(2);
+                    var icon_url = "http://openweathermap.org/img/w/" + data.weather[0].icon + ".png";
+                    $("#desc").text(data.weather[0].description);
+                    $("#wind").text(data.wind.speed + "M/S, " + data.wind.deg);
+                    $("#temp").text(temp + "C");
+                    $("#img_icon").attr("src", icon_url);
+                    $("#toggle").text("Display Fahrenheit");
+                });
+            }
+        });
+
+        $("#toggle").click(function() {
+            var toggleText = $("#toggle").text();
+            var temp = 0;
+            if (/Fahrenheit/.test(toggleText)) {
+                $("#toggle").text("Display Celsius");
+                temp = parseFloat($("#temp").text()) * 9/5 + 32;
+                temp = temp.toFixed(2);
+                //console.log(temp);
+                $("#temp").text(temp + "F");
+            } else if (/Celsius/.test(toggleText)) {
+                $("#toggle").text("Display Fahrenheit");
+                temp = ( parseFloat($("#temp").text()) - 32) * 5/9;
+                temp = temp.toFixed(2);
+                $("#temp").text(temp + "C");
+            } else {
+                $("#temp").text("Value Error");
+            }
+        });
+
+    });
+</script>

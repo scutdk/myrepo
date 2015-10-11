@@ -1,0 +1,180 @@
+<head>
+    <title>A Pomodoro clock </title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Lobster|PT+Sans' rel='stylesheet' type='text/css'>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-MfvZlkHCEqatNoGiOXveE8FIwMzZg4W85qfrfIFBfYc= sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ=="
+    crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha256-Sk3nkD6mLTMOF0EOpNtsIry+s1CsaqQC1rVLTAy+0yc= sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+    <div class="col-xs-6 col-xs-offset-3 text-center">
+    <div class="text-center">
+        <h1 class="text-primary">FreeCodeCamp</h1>
+        <h2 class="text-primary">Pomodoro Clock</h1>
+    </div>
+    <div class="row setter">
+        <div class="col-xs-6">
+            <p>BREAK LENGTH</p>
+            <span><a href="#" id="break_minus">-</a></span>
+            <span id="break_len">5</span>
+            <span><a href="#"  id="break_add">+</a></span>
+        </div>
+        <div class="col-xs-6">
+            <p>SESSION LENGTH</p>
+            <span><a href="#" id="session_minus">-</a></span>
+            <span id="session_len">25</span>
+            <span><a href="#" id="session_add">+</a></span>            
+        </div>
+    </div>
+    <div  class="row">
+        <a href="#">
+        <div id="pomodoro">
+        <div class="vcenter">
+            <p id="p_status">Session</p>
+            <p id="p_len" class="session_len">25</p>
+        </div>
+        </div>
+        </a>
+    </div>
+    </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+$(document).ready(function() {
+    var percent = 0;
+    var session_len = 25;
+    var break_len = 5;
+    var interval = false;
+    var elapsed = 0;
+    
+    $("#break_minus").click(function() {
+        if (interval !== false) {
+            return false;
+        }
+        elapsed = 0;
+        var break_len_now = parseInt($("#break_len").text());
+        break_len = break_len_now - 1;
+        if (break_len <= 0) {
+            break_len = 0;
+        }
+        $("#break_len").text(break_len);
+        if (/Break/i.test($("#p_status").text())) {
+            $("#p_len").text(break_len);
+        }
+        
+        return false;
+    });
+    
+    $("#break_add").click(function() {
+        if (interval !== false) {
+            return false;
+        }        
+        elapsed = 0;
+        var break_len_now = parseInt($("#break_len").text());
+        break_len = break_len_now + 1;
+        $("#break_len").text(break_len);
+        if (/Break/i.test($("#p_status").text())) {
+            $("#p_len").text(break_len);
+        } 
+        
+        return false;
+    });
+    
+    $("#session_add").click(function() {
+        if (interval !== false) {
+            return false;
+        }        
+        elapsed = 0;
+        var session_len_now = parseInt($("#session_len").text());
+        session_len = session_len_now + 1;
+        $("#session_len").text(session_len);
+        if (/Session/i.test($("#p_status").text())) {
+            $("#p_len").text(session_len);
+        }
+        
+        return false;
+    });
+    
+    $("#session_minus").click(function() {
+        if (interval !== false) {
+            return false;
+        }       
+        elapsed = 0;
+        var session_len_now = parseInt($("#session_len").text());
+        session_len = session_len_now - 1;
+        if (session_len <= 0) {
+            session_len = 0;
+        }        
+        $("#session_len").text(session_len);
+        console.log($("#p_status").text() + /Session/i.test($("#p_status").text()));
+        if (/Session/i.test($("#p_status").text())) {
+            $("#p_len").text(session_len);
+        }
+        
+        return false;
+    });
+    
+    $("#pomodoro").click(function() {
+        if (interval === false) {
+            interval = setInterval(doPomodoro, 1000);
+        } else {
+            clearInterval(interval);
+            interval = false;
+        }
+    });
+    
+    var doPomodoro = function() {
+        elapsed += 1;
+        if (/Session/i.test($("#p_status").text())) {
+            percent = (elapsed / session_len / 60 * 100).toFixed(2);
+            var remained = session_len * 60 - elapsed;
+            displayPClock(remained);
+            var gradient = "linear-gradient(to top, DarkOrange " + percent + "%, #444 0%)"
+            //console.log(gradient);
+            $("#pomodoro").css("background", gradient);
+            
+            if (remained === 0) {
+                $("#p_status").text("Break");
+                playMusic();
+                elapsed = 0;
+            }
+        } else if (/Break/i.test($("#p_status").text())) {
+            percent = (elapsed / break_len / 60 * 100).toFixed(2);
+            var remained = break_len * 60 - elapsed;
+            displayPClock(remained);
+            var gradient = "linear-gradient(to top, DarkRed " + percent + "%, #444 0%)"
+            //console.log(gradient);
+            $("#pomodoro").css("background", gradient);    
+            
+            if (remained === 0) {
+                $("#p_status").text("Session");
+                playMusic();
+                elapsed = 0;
+            }            
+        } else {
+            $("#p_len").text("ERROR");
+        }    
+
+    };
+    
+    var displayPClock = function(time) {
+        var minutes = Math.floor(time / 60);
+        var seconds = time - minutes * 60;
+        var hours = Math.floor(time / 3600);
+        time = time - hours * 3600;
+        var str_pad_left = function(string,pad,length) {
+            return (new Array(length+1).join(pad)+string).slice(-length);
+        }
+        var finalTime = str_pad_left(minutes,'0',2)+':'+str_pad_left(seconds,'0',2);
+        $("#p_len").text(finalTime);
+    };
+    
+    var playMusic = function() {
+        var audio = new Audio("http://www.freesfx.co.uk/rx2/mp3s/7/8237_1352125362.mp3");
+        audio.play();
+    }
+});
+</script>

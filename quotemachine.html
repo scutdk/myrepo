@@ -1,0 +1,51 @@
+<head>
+  <title>A random quote machine </title>
+  <link href='https://fonts.googleapis.com/css?family=Lobster|PT+Sans' rel='stylesheet' type='text/css'>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-MfvZlkHCEqatNoGiOXveE8FIwMzZg4W85qfrfIFBfYc= sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha256-Sk3nkD6mLTMOF0EOpNtsIry+s1CsaqQC1rVLTAy+0yc= sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
+</head>
+
+<body>
+  <div class="wrapper">
+  <div>
+    <h1 class="title text-center">A random quote machine</h1>
+    <p class="intro">Those are my favorite quotes. You can click the new quote button to get a new quote. Hope you like it.</p>
+  </div>
+  <div>
+    <div class="text-center">
+        <button id="newquote" class="mybtn btn btn-large btn-primary">New Quote</button>
+        <button id="tshare" class="mybtn btn btn-large btn-primary">Share to Twitter</button>
+    </div>
+    <div id="container">
+      <p class="quote">Because it's there.</p>
+      <em><p class="author">George Mallory on climbing mountains</p></em>
+    </div>
+  </div>
+  </div>
+</body>
+
+<script>
+$(document).ready(function(){
+    $("#newquote").click(function() {
+        $.ajax({
+            url: "https://andruxnet-random-famous-quotes.p.mashape.com/cat=movies",
+            type: "post",
+            //well, it's dangerous to put your app key here, just for a public demo.
+            headers: {"X-Mashape-Key": "r9l8vzstjjmshvvpXeD5qANkrA8Gp15TAdojsn9NAbUpmU8ya7"},
+            dataType: 'json',
+            success: function(data) {
+                //console.log(data.quote);
+                $(".quote").text(data.quote);
+                $(".author").text(data.author);
+            }
+        })
+    });
+    $("#tshare").click(function() {
+        var text = $("#container").text();
+        var url = "https://twitter.com/intent/tweet?text=" + text;
+        window.open(url,'_blank');
+    });
+});
+</script>
+</html>
